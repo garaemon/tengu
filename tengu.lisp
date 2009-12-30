@@ -36,6 +36,8 @@
            #:add-costed-arc
            #:<strips-problem> #:<strips-action>
            #:<strips-predicate>
+           #:all-object-combination
+           #:all-object-satisfy-type
            #:satisfy-condition-p
            #:goal-test
            #:objects-of

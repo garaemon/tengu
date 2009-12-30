@@ -90,19 +90,19 @@
            (ignore debug))
   (when debug
     (debug-print-variable type all-object-satisfy-type))
-    (remove-if
-     #'null
-     (mapcar
-      #'(lambda (obj)
-          (declare (type symbol obj))
+  (remove-if
+   #'null
+   (mapcar
+    #'(lambda (obj)
+        (declare (type symbol obj))
+        (when debug
+          (debug-print-variable obj all-object-satisfy-type))
+        (let ((type-tree (object-type-tree-of problem obj)))
+          (declare (type list type-tree))
           (when debug
-            (debug-print-variable obj all-object-satisfy-type))
-          (let ((type-tree (object-type-tree-of problem obj)))
-            (declare (type list type-tree))
-            (when debug
-              (debug-print-variable type-tree all-object-satisfy-type))
-            (if (find type type-tree) obj nil)))
-      (objects-of problem))))
+            (debug-print-variable type-tree all-object-satisfy-type))
+          (if (find type type-tree) obj nil)))
+    (objects-of problem))))
 
 ;; method: all-object-combination
 ;; 型をもらって, その方を満たすようなobjectの組み合わせを返す
@@ -110,9 +110,11 @@
 ;; (<hoge> <fuga>)をもらうと, ((hoge-a fuga-a) (hoge-a fuga-b) (hoge-b fuga-a) (hoge-b fuga-b))
 ;; を返す.
 (defgeneric all-object-combination (g type action state &key debug))
-(defmethod all-object-combination ((g <strips-problem>) (types cons) action state &key (debug nil))
+(defmethod all-object-combination
+    ((g <strips-problem>) (types cons) action state &key (debug nil))
   (declare (ignore debug))
-  (let ((types-objects (mapcar #'(lambda (x) (all-object-satisfy-type g x :debug debug)) types)))
+  (let ((types-objects
+         (mapcar #'(lambda (x) (all-object-satisfy-type g x :debug debug)) types)))
     (declare (type list types-objects))
     (if action
         (let ((tmp (%all-combination types-objects g action state)))
@@ -288,14 +290,17 @@ types-objects
    (constant-predicates-of g)))
 
 (defgeneric set-initial-state (g istates))
-(defmethod set-initial-state ((g <strips-problem>) (istates cons)) ;:initial-state -> set-initial-state
-  (setf (start-state-of g) (make-instance '<strips-node> :value (create-state g)))
+(defmethod set-initial-state ((g <strips-problem>) (istates cons))
+  ;;:initial-state -> set-initial-state
+
+  (setf (start-state-of g)
+        (make-instance '<strips-node> :value (create-state g)))
   (setf (constant-state-of g) (create-constant-state g))
   (dolist (stt istates)
     (if (find (car stt) (constant-predicates-of g) :key #'name-of)
         (setf (cdr (assoc stt (constant-state-of g) :test #'equal)) t)
-        (setf (cdr (assoc stt (value-of (start-state-of g)) :test #'equal)) t)))
-  (add-node g (start-state-of g))
+      (setf (cdr (assoc stt (value-of (start-state-of g)) :test #'equal)) t)))
+  (add-node g (start-state-of g))       ;here?
   (start-state-of g))
 
 (defgeneric strips-type-symbol-p (sym))
