@@ -232,24 +232,27 @@ types-objects
   (declare (type list a b))
   (equal a b))
 
-(defmethod successors-of ((g <strips-problem>) (state <strips-node>) &key (debug nil))
+(defmethod successors-of
+    ((g <strips-problem>) (state <strips-node>) &key (debug nil))
   (mapcan
    #'(lambda (action)
        ;; 考えられうる引数を全て考えてから, preconditionで切っている
        ;; それだとメモリバカ食いらしい
-       (let ((arg-list (all-object-combination g (parameters-type-of action) action state
-                                               :debug debug)))
-;;          (when debug
-;;            (debug-print-variable arg-list successors-of))
+       (let ((arg-list (all-object-combination
+                        g (parameters-type-of action) action state
+                        :debug debug)))
          (remove-if
           #'null
           (mapcar #'(lambda (arg)
                       (when debug
                         (debug-print-variable arg successors-of))
                       (when (satisfy-precondition-p g action state arg)
-                        (let ((next-state (next-state action state arg))) ;:exec -> next-state
-                          (if (find-if #'(lambda (x)
-                                           (equal-strips-state-p (value-of x) (value-of next-state)))
+                        ;;:exec -> next-state
+                        (let ((next-state (next-state action state arg)))
+                          (if (find-if
+                               #'(lambda (x)
+                                   (equal-strips-state-p (value-of x)
+                                                         (value-of next-state)))
                                        (nodes-of g))
                               nil
                               (progn
@@ -367,7 +370,8 @@ types-objects
 (defmethod add-constant-predicate ((problem <strips-problem>) pre)
   ;; 重複チェック
   (setf (constant-predicates-of problem)
-        (delete (car pre) (constant-predicates-of problem) :key #'name-of :count 1))
+        (delete (car pre) (constant-predicates-of problem)
+                :key #'name-of :count 1))
   (push (make-instance '<strips-predicate>
                        :name (car pre)
                        :parameters (mapcar #'cadr (cdr pre))
