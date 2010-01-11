@@ -234,7 +234,7 @@
              (push (state-of target-node) (close-list-of solver))
              (format t "current cost is ~A~%" (cost-of target-node))
              (let ((expanded-nodes (expand target-node graph :debug debug)))
-               (declare (type list expanded-nodes))
+               ;;(declare (type list expanded-nodes))
                (format t "~A nodes~%" (length expanded-nodes))
                (if expanded-nodes
                    (add-to-open-list solver expanded-nodes))) ;

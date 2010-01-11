@@ -4,9 +4,9 @@
 ;;
 ;;                               written by R.Ueda(garaemon@gmail.net)
 ;;====================================================================
-;;(declaim (optimize (debug 3) (safety 3)))
+(declaim (optimize (debug 3) (safety 3)))
 ;;(declaim (optimize (debug 0) (safety 0) (compilation-speed 0) (speed 3) (space 3)))
-(declaim (optimize (debug 0) (safety 0) (compilation-speed 0) (speed 3) (space 0)))
+;; (declaim (optimize (debug 0) (safety 0) (compilation-speed 0) (speed 3) (space 0)))
 
 (in-package :tengu)
 
@@ -234,7 +234,7 @@ types-objects
 
 (defmethod successors-of
     ((g <strips-problem>) (state <strips-node>) &key (debug nil))
-  (mapcan
+  (let ((r (mapcan
    #'(lambda (action)
        ;; 考えられうる引数を全て考えてから, preconditionで切っている
        ;; それだとメモリバカ食いらしい
@@ -251,16 +251,18 @@ types-objects
                         (let ((next-state (next-state action state arg)))
                           (if (find-if
                                #'(lambda (x)
-                                   (equal-strips-state-p (value-of x)
-                                                         (value-of next-state)))
-                                       (nodes-of g))
+                                   (equal-strips-state-p
+                                    (value-of x)
+                                    (value-of next-state)))
+                               (nodes-of g))
                               nil
                               (progn
                                 (add-node g next-state)
                                 (cons (action-name-of action arg)
                                       next-state))))))
                   arg-list))))
-   (actions-of g)))
+   (actions-of g))))
+    r))
 
 (defgeneric create-state (g &key debug))
 (defmethod create-state ((g <strips-problem>) &key (debug nil))
@@ -395,8 +397,8 @@ types-objects
   (let ((condition (replace-list (precondition-of action) ;(and (on a b) ...)
                                  (parameters-of action)   ;(a b ...)
                                  args)))                  ;(pet desk ...)
-    ;;(satisfy-condition-p (value-of state) condition)))
-    (satisfy-condition-p (append (constant-state-of problem) (value-of state)) condition)))
+    (satisfy-condition-p
+     (append (constant-state-of problem) (value-of state)) condition)))
 
 (defun change-to-satisfy-condition (state condition)
   (declare (type list condition))
