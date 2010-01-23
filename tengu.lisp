@@ -48,5 +48,6 @@
            #:definitial-state #:defgoal-state
            #:defaction
            #:solve-strips
+           #:copy-strips-problem
            )
   )

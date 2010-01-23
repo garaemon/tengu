@@ -485,3 +485,27 @@ types-objects
                                :heuristic heuristic)))
     (solve solver problem)))
 
+(defmethod copy-strips-problem ((problem <strips-problem>))
+  (make-instance '<strips-problem>
+                 :start-state
+                 (make-instance '<strips-node>
+                                :name (name-of (start-state-of problem))
+                                :neighbors nil
+                                :value
+                                (copy-list
+                                 (value-of (start-state-of problem))))
+                 :goal-state (goal-state-of problem)
+                 :name (name-of problem)
+                 :actions (copy-list (actions-of problem))
+                 :predicates (copy-list (predicates-of problem))
+                 :constant-predicates
+                 (constant-predicates-of problem)
+                 :initial-state
+                 (copy-list (initial-state-of problem))
+                 :constant-state
+                 (copy-list (constant-state-of problem))
+                 :class-obj-alist
+                 (copy-list (class-obj-alist-of problem))
+                 :type-alist
+                 (copy-list (type-alist-of problem))
+                 ))
